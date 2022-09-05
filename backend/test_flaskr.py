@@ -1,6 +1,6 @@
 import os
 import unittest
-import json
+import json, requests
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app

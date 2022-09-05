@@ -8,6 +8,19 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
+
+
+
+def paginate_question(request, selection):
+    page = request.args.get('page', 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [question.format() for question in selection]
+    current_questions = questions[start:end]
+
+    return current_questions
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -16,7 +29,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    cors = CORS(app, resources={r"/questions*":{"origins":"*"}, r"/categories*":{"origins":"*"}})
+    cors = CORS(app, resources={r"/categories*":{"origins":"*"}})
 
     """
     @DONE: Use the after_request decorator to set Access-Control-Allow
@@ -25,17 +38,29 @@ def create_app(test_config=None):
     @app.after_request
     def after_request(response):
         response.headers.add(
-            "Access-Control-Allow-Headers", "Content-Type, Authorization, true"
+            "Access-Control-Allow-Headers", "Content-Type,Authorization,true"
         )
         response.headers.add(
-            "Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS"
+             "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
         )
+        return response
 
     """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
     """
+    @app.route('/categories', methods=['GET'])
+    def get_categories():
+        print('hello')
+        body = request.get_json()
+        selection = Category.query.order_by(Category.id).all()
+
+        return jsonify({
+            'success' : True,
+            'categories' : {"name" : "hello"}
+        })
+    
 
 
     """
