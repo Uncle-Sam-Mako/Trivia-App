@@ -64,15 +64,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['questions']), 4)
         self.assertTrue(len(data['total_questions']))
-        self.assertTrue(len(data['current_categorie']))    
+        self.assertTrue(len(data['current_category']))    
     
     def test_post_question(self):
-        """Given a web user, when he its /questions with a post request, then the response should have a status code of 200"""
-        res = self.client().post('/question', json=self.new_question)
+        """Given a web user, when he hits /questions with a post request, then the response should have a status code of 200"""
+        res = self.client().post('/questions', json=self.new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['questions']))
         self.assertTrue(len(data['categories']))
 
     def test_delete_question(self):

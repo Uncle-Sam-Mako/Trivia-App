@@ -1,4 +1,6 @@
+from multiprocessing import current_process
 import os
+from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -11,7 +13,7 @@ QUESTIONS_PER_PAGE = 10
 
 
 
-def paginate_question(request, selection):
+def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
@@ -74,10 +76,10 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
-    @app.route('/questions')
+    @app.route('/questions', methods=['GET'])
     def retrieve_questions():
         selection = Question.query.order_by(Question.id).all()
-        current_questions = paginate_question(request, selection)
+        current_questions = paginate_questions(request, selection)
         categories = [category.format() for category in Category.query.all()]
 
         if(len(current_questions)==0):
@@ -107,7 +109,28 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def new_question():
+        body = request.get_json()
+        new_answer = body.get("answer")
+        new_category = body.get("category")
+        new_question = body.get("question")
+        new_difficulty = body.get("difficulty")
 
+        try:
+            question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
+            question.insert()
+
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+            categories = [category.format() for category in Category.query.order_by(Category.id).all()]
+            return jsonify({
+                "success" : True,
+                "questions" : current_questions,
+                "categories" : categories
+            })
+        except:
+            abort(422)
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
