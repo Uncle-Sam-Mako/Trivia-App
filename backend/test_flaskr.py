@@ -77,14 +77,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data['categories']))
 
     def test_delete_question(self):
-        res = self.client().delete('/question/2')
+        res = self.client().delete('/questions/2')
         data = json.loads(res.data)
         question = Question.query.filter(Question.id == 2).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(len(data['deleted']), 2)
-        self.assertTrue(len(data['total_questions']))
+        self.assertEqual(data['deleted'], 2)
+        self.assertTrue(data['total_questions'])
         self.assertEqual(question, None)
         
 
