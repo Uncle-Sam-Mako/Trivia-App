@@ -29,7 +29,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    cors = CORS(app, resources={r"/categories*":{"origins":"*"}})
+    cors = CORS(app, resources={r"/categories*":{"origins":"*"}, r"/questions*":{"origins":"*"}})
 
     """
     @DONE: Use the after_request decorator to set Access-Control-Allow
@@ -52,16 +52,15 @@ def create_app(test_config=None):
     """
     @app.route('/categories', methods=['GET'])
     def get_categories():
-        print('hello')
-        body = request.get_json()
         selection = Category.query.order_by(Category.id).all()
-
+        categories = [category.format() for category in selection]
+        if(len(selection) == 0):
+            abort(404)
         return jsonify({
             'success' : True,
-            'categories' : {"name" : "hello"}
+            'categories' : categories
         })
     
-
 
     """
     @TODO:
@@ -75,7 +74,21 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route('/questions')
+    def retrieve_questions():
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_question(request, selection)
+        categories = [category.format() for category in Category.query.all()]
 
+        if(len(current_questions)==0):
+            abort(404)
+        return jsonify({
+            'success' : True,
+            'questions' : current_questions,
+            'categories' : categories,
+            'total_questions' : len(selection),
+            'current_category' : 4
+        })
     """
     @TODO:
     Create an endpoint to DELETE question using a question ID.

@@ -36,7 +36,7 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
     def test_get_categories(self):
-        """Given a web user, when he its /categories with a get request, then the response should have a status code of 200"""
+        """Given a web user, when he hits /categories with a get request, then the response should have a status code of 200"""
         res = self.client().get('/categories')
         data = json.loads(res.data)
 
@@ -51,9 +51,10 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['questions']))
         self.assertTrue(len(data['categories']))
-        self.assertTrue(len(data['total_questions']))
-        self.assertTrue(len(data['current_categorie']))
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
 
     def test_get_questions_in_specific_category(self):
         res = self.client().get('/categories/4/questions')
