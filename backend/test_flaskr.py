@@ -18,7 +18,7 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgresql://{}:{}@{}/{}".format("uncle-sam", "1234", "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
 
-        self.new_question= {"question": "Who is the black president in USA ?", "answer": "Barack Obama", "difficulty": 1, "category":4}
+        self.new_question= {"question": "Who is the first black president in USA ?", "answer": "Barack Obama", "difficulty": 1, "category":4}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -57,14 +57,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['current_category'])
 
     def test_get_questions_in_specific_category(self):
-        res = self.client().get('/categories/4/questions')
+        """Given a web user when he hits categories/category_id/questions with a valid category id and a get request, then the response should have a status code of 200"""
+        res = self.client().get('/categories/5/questions')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(len(data['questions']), 4)
-        self.assertTrue(len(data['total_questions']))
-        self.assertTrue(len(data['current_category']))    
+        self.assertTrue(len(data['questions']))
+        self.assertEqual(data['total_questions'], 2)
+        self.assertEqual(data['current_category'], 5)    
     
     def test_post_question(self):
         """Given a web user, when he hits /questions with a post request, then the response should have a status code of 200"""

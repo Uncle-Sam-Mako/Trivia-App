@@ -6,10 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
-
 
 
 
@@ -28,6 +27,8 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
 
+
+    
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
@@ -167,6 +168,27 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:category_id>/questions')
+    def questions_by_category(category_id):
+        selected_category = Category.query.filter(Category.id == category_id).one_or_none()
+
+        if selected_category is None:
+            abort(404)
+
+        
+        selection = Question.query.filter(Question.category == str(category_id)).all()
+        current_questions = paginate_questions(request, selection)
+
+        return jsonify({
+            "success" : True,
+            "questions" : current_questions,
+            "total_questions" : len(selection),
+            "current_category" : category_id
+        })
+
+        
+
+
 
     """
     @TODO:
@@ -179,7 +201,7 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-
+    
     """
     @TODO:
     Create error handlers for all expected errors
