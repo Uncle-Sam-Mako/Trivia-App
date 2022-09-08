@@ -35,58 +35,69 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-    def test_get_categories(self):
-        """Given a web user, when he hits /categories with a get request, then the response should have a status code of 200"""
-        res = self.client().get('/categories')
-        data = json.loads(res.data)
+    # def test_get_categories(self):
+    #     """Given a web user, when he hits /categories with a get request, then the response should have a status code of 200"""
+    #     res = self.client().get('/categories')
+    #     data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(len(data['categories']))
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(len(data['categories']))
 
-    def test_get_paginated_questions(self):
-        """Given a web user when he hits /questions with a get request, then the response should have a status code of 200"""
-        res = self.client().get('/questions')
-        data = json.loads(res.data)
+    # def test_get_paginated_questions(self):
+    #     """Given a web user when he hits /questions with a get request, then the response should have a status code of 200"""
+    #     res = self.client().get('/questions')
+    #     data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(len(data['questions']))
-        self.assertTrue(len(data['categories']))
-        self.assertTrue(data['total_questions'])
-        self.assertTrue(data['current_category'])
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(len(data['questions']))
+    #     self.assertTrue(len(data['categories']))
+    #     self.assertTrue(data['total_questions'])
+    #     self.assertTrue(data['current_category'])
 
-    def test_get_questions_in_specific_category(self):
-        """Given a web user when he hits categories/category_id/questions with a valid category id and a get request, then the response should have a status code of 200"""
-        res = self.client().get('/categories/5/questions')
-        data = json.loads(res.data)
+    # def test_get_questions_in_specific_category(self):
+    #     """Given a web user when he hits categories/category_id/questions with a valid category id and a get request, then the response should have a status code of 200"""
+    #     res = self.client().get('/categories/5/questions')
+    #     data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(len(data['questions']))
-        self.assertEqual(data['total_questions'], 2)
-        self.assertEqual(data['current_category'], 5)    
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(len(data['questions']))
+    #     self.assertEqual(data['total_questions'], 2)
+    #     self.assertEqual(data['current_category'], 5)    
     
-    def test_post_question(self):
-        """Given a web user, when he hits /questions with a post request, then the response should have a status code of 200"""
-        res = self.client().post('/questions', json=self.new_question)
+    # def test_post_question(self):
+    #     """Given a web user, when he hits /questions with a post request, then the response should have a status code of 200"""
+    #     res = self.client().post('/questions', json=self.new_question)
+    #     data = json.loads(res.data)
+
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertTrue(len(data['questions']))
+    #     self.assertTrue(len(data['categories']))
+
+    def test_search_question(self):
+        """Given a web user, when he hits /questions with search term and a post request, then the response should have a status code of 200"""
+        res = self.client().post('/questions', json={"searchTerm":"boxer"})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(len(data['questions']))
-        self.assertTrue(len(data['categories']))
+        self.assertEqual(data['total_questions'], 1)
+        self.assertEqual(data['current_category'], 4)
 
-    def test_delete_question(self):
-        res = self.client().delete('/questions/2')
-        data = json.loads(res.data)
-        question = Question.query.filter(Question.id == 2).one_or_none()
+    # def test_delete_question(self):
+    #     res = self.client().delete('/questions/2')
+    #     data = json.loads(res.data)
+    #     question = Question.query.filter(Question.id == 2).one_or_none()
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 2)
-        self.assertTrue(data['total_questions'])
-        self.assertEqual(question, None)
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertEqual(data['deleted'], 2)
+    #     self.assertTrue(data['total_questions'])
+    #     self.assertEqual(question, None)
         
 
 # Make the tests conveniently executable

@@ -130,23 +130,42 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def new_question():
         body = request.get_json()
-        new_answer = body.get("answer")
-        new_category = body.get("category")
-        new_question = body.get("question")
-        new_difficulty = body.get("difficulty")
+        new_answer = body.get("answer", None)
+        new_category = body.get("category", None)
+        new_question = body.get("question", None)
+        new_difficulty = body.get("difficulty", None)
+        searchTerm = body.get("searchTerm", None)
 
+        
         try:
-            question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
-            question.insert()
+            if not searchTerm:
+                question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
+                question.insert()
 
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection)
-            categories = [category.format() for category in Category.query.order_by(Category.id).all()]
-            return jsonify({
-                "success" : True,
-                "questions" : current_questions,
-                "categories" : categories
-            })
+                selection = Question.query.order_by(Question.id).all()
+                current_questions = paginate_questions(request, selection)
+                categories = [category.format() for category in Category.query.order_by(Category.id).all()]
+                return jsonify({
+                    "success" : True,
+                    "questions" : current_questions,
+                    "categories" : categories
+                })
+
+
+            else:
+                selection = Question.query.order_by(Question.id).filter(
+                    Question.question.ilike("%{}%".format(searchTerm))
+                )
+                current_questions = paginate_questions(request, selection)
+
+                return jsonify(
+                    {
+                        "success": True,
+                        "questions": current_questions,
+                        "total_questions": len(selection.all()),
+                        "current_category" : 4
+                    }
+                )
         except:
             abort(422)
     """
@@ -159,7 +178,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-
+   
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
