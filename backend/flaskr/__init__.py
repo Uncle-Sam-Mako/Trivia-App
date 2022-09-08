@@ -93,7 +93,7 @@ def create_app(test_config=None):
             'questions' : current_questions,
             'categories' : categories,
             'total_questions' : len(selection),
-            'current_category' : 4
+            'current_category' : None
         })
     """
     @TODO:
@@ -107,7 +107,7 @@ def create_app(test_config=None):
 
         try:
             question = Question.query.filter(Question.id == question_id).one_or_none()
-
+            current_category = question.id
             if question is None:
                 abort(404)
 
@@ -116,7 +116,8 @@ def create_app(test_config=None):
             return jsonify({
                 "success" : True,
                 "deleted" : question_id,
-                "total_questions" : selection
+                "total_questions" : selection,
+                "current_category" : current_category
             })
         except:
             abort(422)
@@ -151,6 +152,7 @@ def create_app(test_config=None):
                 return jsonify({
                     "success" : True,
                     "questions" : current_questions,
+                    "total_questions" : len(selection),
                     "categories" : categories
                 })
 
@@ -166,7 +168,7 @@ def create_app(test_config=None):
                         "success": True,
                         "questions": current_questions,
                         "total_questions": len(selection.all()),
-                        "current_category" : 4
+                        "current_category" : None
                     }
                 )
         except:
@@ -258,6 +260,33 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return (
+            jsonify({"success": False, "error": 404, "message": "resource not found"}),
+            404,
+        )
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return (
+            jsonify({"success": False, "error": 422, "message": "unprocessable"}),
+            422,
+        )
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
+
+    @app.errorhandler(405)
+    def not_found(error):
+        return (
+            jsonify({"success": False, "error": 405, "message": "method not allowed"}),
+            405,
+        )
+
+
     @app.route('/')
     def index():
         return "Hello World!! :)"
