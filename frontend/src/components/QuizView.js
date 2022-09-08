@@ -19,12 +19,20 @@ class QuizView extends Component {
     };
   }
 
+  get_category_type(obj){
+    let id_array = []
+    for(let item of obj){
+      id_array.push(item.type)
+    }
+    return id_array
+  }
+  
   componentDidMount() {
     $.ajax({
       url: `/categories`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
-        this.setState({ categories: result.categories });
+        this.setState({ categories: this.get_category_type(result.categories)  });
         return;
       },
       error: (error) => {
