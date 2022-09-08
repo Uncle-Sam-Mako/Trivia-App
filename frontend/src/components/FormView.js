@@ -14,12 +14,20 @@ class FormView extends Component {
     };
   }
 
+  get_Category_Id(obj){
+    let id_array = []
+    for(let item of obj){
+      id_array.push(item.id)
+    }
+    return id_array
+  }
+
   componentDidMount() {
     $.ajax({
       url: `/categories`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
-        this.setState({ categories: result.categories });
+        this.setState({ categories: this.get_Category_Id(result.categories) });
         return;
       },
       error: (error) => {
