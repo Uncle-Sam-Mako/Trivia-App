@@ -23,15 +23,6 @@ def paginate_questions(request, selection):
     current_questions = questions[start:end]
 
     return current_questions
-    
-
-def getNextQuestions(selection, previousQuestions):
-    questions = [question.format() for question in selection]
-    for i in questions:
-        if previousQuestions:
-            if i['id'] in previousQuestions:
-                questions.remove(i)
-    return questions
 
 
 def create_app(test_config=None):
@@ -233,31 +224,32 @@ def create_app(test_config=None):
     """
 
     @app.route('/quizzes', methods=['POST'])
-    def play_questions():
-        body = request.get_json()
-        quiz_category = body.get('quiz_category', None)
-        previousQuestions = body.get('previous_questions')
-        
-        
-        if quiz_category['id'] != 0:
-            selection = Question.query.order_by(Question.id).filter(Question.category == str(quiz_category['id'])).all()
-        else: 
-            selection = Question.query.order_by(Question.id).all()
+    def play_quiz():
+        try: 
+            body = request.get_json()
+            quiz_category = body.get('quiz_category', None)
+            previousQuestions = body.get('previous_questions')
+            question = None
+            
+            # If a specific category is selected instead of 'All'
+            if quiz_category['id'] != 0:
+                selection = Question.query.order_by(Question.id).filter(Question.category == str(quiz_category['id']), Question.id.notin_(previousQuestions)).all()
+            else: 
+                selection = Question.query.order_by(Question.id).filter(Question.id.notin_(previousQuestions)).all()
 
-        
+            # We format all the questions in selection
+            nextQuestions = [question.format() for question in selection]
 
-        nextQuestions = getNextQuestions(selection, previousQuestions)
+            # I there are items in selection
+            if(selection):
+                question = random.choice(nextQuestions)
 
-        question = random.choice(nextQuestions)
-
-
-        print(previousQuestions, [question['id'] for question in nextQuestions])
-
-        return jsonify({
-            "success" : True,
-            "question" : question
-        })
-        
+            return jsonify({
+                "success" : True,
+                "question" : question
+            })
+        except:
+            abort(422)
         
         
     
