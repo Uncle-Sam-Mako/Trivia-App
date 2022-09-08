@@ -1,5 +1,7 @@
+import json
 from multiprocessing import current_process
 import os
+from select import select
 from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -21,6 +23,16 @@ def paginate_questions(request, selection):
     current_questions = questions[start:end]
 
     return current_questions
+    
+
+def getNextQuestions(selection, previousQuestions):
+    questions = [question.format() for question in selection]
+    for i in questions:
+        if previousQuestions:
+            if i['id'] in previousQuestions:
+                questions.remove(i)
+    return questions
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -32,7 +44,7 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    cors = CORS(app, resources={r"/categories*":{"origins":"*"}, r"/questions*":{"origins":"*"}})
+    cors = CORS(app, resources={r"/categories*":{"origins":"*"}, r"/questions*":{"origins":"*"}, r"/quizzes*":{"origins":"*"}})
 
     """
     @DONE: Use the after_request decorator to set Access-Control-Allow
@@ -213,13 +225,41 @@ def create_app(test_config=None):
     @TODO:
     Create a POST endpoint to get questions to play the quiz.
     This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
+    and return a random questions within the given category, if provided, and that is not one of the previous questions.
 
     TEST: In the "Play" tab, after a user selects "All" or a category,
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+
+    @app.route('/quizzes', methods=['POST'])
+    def play_questions():
+        body = request.get_json()
+        quiz_category = body.get('quiz_category', None)
+        previousQuestions = body.get('previous_questions')
+        
+        
+        if quiz_category['id'] != 0:
+            selection = Question.query.order_by(Question.id).filter(Question.category == str(quiz_category['id'])).all()
+        else: 
+            selection = Question.query.order_by(Question.id).all()
+
+        
+
+        nextQuestions = getNextQuestions(selection, previousQuestions)
+
+        question = random.choice(nextQuestions)
+
+
+        print(previousQuestions, [question['id'] for question in nextQuestions])
+
+        return jsonify({
+            "success" : True,
+            "question" : question
+        })
+        
+        
+        
     
     """
     @TODO:

@@ -41,9 +41,8 @@ class QuizView extends Component {
       },
     });
   }
-
   selectCategory = ({ type, id = 0 }) => {
-    this.setState({ quizCategory: { type, id } }, this.getNextQuestion);
+    this.setState({ quizCategory: { type, id: id } }, this.getNextQuestion);
   };
 
   handleChange = (event) => {
@@ -55,7 +54,7 @@ class QuizView extends Component {
     if (this.state.currentQuestion.id) {
       previousQuestions.push(this.state.currentQuestion.id);
     }
-
+    console.log(previousQuestions)
     $.ajax({
       url: '/quizzes', //TODO: update request URL
       type: 'POST',
@@ -113,16 +112,17 @@ class QuizView extends Component {
         <div className='choose-header'>Choose Category</div>
         <div className='category-holder'>
           <div className='play-category' onClick={this.selectCategory}>
-            ALL
+            {'ALL'}
           </div>
           {Object.keys(this.state.categories).map((id) => {
             return (
               <div
                 key={id}
                 value={id}
-                className='play-category'
+                className={'play-category'}
                 onClick={() =>
-                  this.selectCategory({ type: this.state.categories[id], id })
+                  //++id : because indexes starts with 1 in our db
+                  this.selectCategory({ type: this.state.categories[id], id: ++id })
                 }
               >
                 {this.state.categories[id]}
