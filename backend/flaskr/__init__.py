@@ -140,7 +140,6 @@ def create_app(test_config=None):
         new_difficulty = body.get("difficulty", None)
         searchTerm = body.get("searchTerm", None)
 
-        
         try:
             if not searchTerm:
                 question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
@@ -149,6 +148,7 @@ def create_app(test_config=None):
                 selection = Question.query.order_by(Question.id).all()
                 current_questions = paginate_questions(request, selection)
                 categories = [category.format() for category in Category.query.order_by(Category.id).all()]
+
                 return jsonify({
                     "success" : True,
                     "questions" : current_questions,
